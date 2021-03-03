@@ -26,7 +26,7 @@ module.exports = psql.define(
       type: DataTypes.ENUM(currencies),
       allowNull: false,
     },
-    expirationDate: {
+    expiry: {
       type: DataTypes.DATE,
     },
     rate: {

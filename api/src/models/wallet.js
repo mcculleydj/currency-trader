@@ -5,7 +5,7 @@ const { currencies } = require('../util/constants')
 
 const currencyColumns = {}
 currencies.forEach(c => {
-  currencyColumns[c] = { type: DataTypes.FLOAT }
+  currencyColumns[c] = { type: DataTypes.FLOAT, defaultValue: 0 }
 })
 
 module.exports = psql.define(

@@ -4,49 +4,34 @@ const psql = require('../db/postgres')
 const { currencies } = require('../util/constants')
 
 module.exports = psql.define(
-  'CompletedTrade',
+  'Purchase',
   {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
     },
-    type: {
-      type: DataTypes.ENUM(['p2p', 'open']),
+    method: {
+      type: DataTypes.ENUM('card', 'bank'),
+      allowNull: false,
     },
-    offerorId: {
+    methodId: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    offerorName: {
+    // meaningful string to describe the payment method
+    // e.g. last four of CC or bank name
+    description: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    offereeId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    offereeName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    offerCurrency: {
-      type: DataTypes.ENUM(currencies),
-      allowNull: false,
-    },
-    offerAmount: {
+    amount: {
       type: DataTypes.FLOAT,
       allowNull: false,
     },
-    requestedCurrency: {
-      type: DataTypes.ENUM(currencies),
+    currency: {
+      type: DataTypes.ENUM([...currencies]),
       allowNull: false,
-    },
-    expiry: {
-      type: DataTypes.DATE,
-    },
-    rate: {
-      type: DataTypes.FLOAT,
     },
   },
   { underscored: true }

@@ -11,10 +11,9 @@ const CompletedTrade = require('./completed_trade')
 function defineAssociations() {
   User.hasOne(Wallet, {
     onDelete: 'CASCADE',
-  })
-  Wallet.belongsTo(User, {
     foreignKey: 'userId',
   })
+  Wallet.belongsTo(User, { foreignKey: 'userId' })
 
   Wallet.hasMany(Card, {
     onDelete: 'CASCADE',
