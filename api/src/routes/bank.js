@@ -1,5 +1,5 @@
 const { Bank } = require('../models')
-const { bankSchema } = require('../validation')
+const { bankSchema } = require('../util/validation')
 
 async function get(req, res) {
   try {

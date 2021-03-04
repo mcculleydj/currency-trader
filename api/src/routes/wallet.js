@@ -1,7 +1,6 @@
 const { Wallet } = require('../models')
 
 async function get(req, res) {
-  console.log('\n\nhello')
   try {
     const wallet = await Wallet.findOne({ where: { userId: req.user.id } })
 

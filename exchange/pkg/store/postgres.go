@@ -1,11 +1,15 @@
 package store
 
 import (
-	"database/sql"
+	"errors"
+	"time"
+
 	"fmt"
 	"os"
 	"strings"
 
+
+	sql "github.com/jmoiron/sqlx"
 	"github.com/mcculleydj/currency-trader/exchange/pkg/common"
 )
 
@@ -59,6 +63,9 @@ func CreateTables() error {
 
 // InsertRow populates a row in the archive DB
 func InsertRow(source string, data *common.ResponseBody) error {
+	if !common.ValidateCurrency(source) {
+		return errors.New("invalid currency")
+	}
 	query := fmt.Sprintf(`
 	INSERT INTO %s (effective_date, %s)
 	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
@@ -71,4 +78,29 @@ func InsertRow(source string, data *common.ResponseBody) error {
 
 	_, err := db.Exec(query, values...)
 	return err
+}
+
+// GetRows returns a streamable rows interface
+func GetRows(currency string) (*sql.Rows, error) {
+	if !common.ValidateCurrency(currency) {
+		return nil, errors.New("invalid currency")
+	}
+	// TODO: implement date range windowing
+	return db.Queryx(fmt.Sprintf("SELECT * FROM %s", currency))
+}
+
+// GetLatest returns the date of the latest row
+func GetLatest(currency string) (time.Time, error) {
+	if !common.ValidateCurrency(currency) {
+		return time.Time{}, errors.New("invalid currency")
+	}
+	row := db.QueryRowx(fmt.Sprintf(`
+		SELECT effective_date
+		FROM %s
+		ORDER BY effective_date DESC
+		LIMIT 1
+	`, currency))
+	ar := common.ArchiveRow{}
+	err := row.StructScan(&ar)
+	return ar.Date, err
 }

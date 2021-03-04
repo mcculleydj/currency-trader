@@ -11,6 +11,7 @@ const bankHandlers = require('./bank')
 const cardHandlers = require('./card')
 const tradeHandlers = require('./trade')
 const transferHandlers = require('./transfer')
+const exchangeHandlers = require('./exchange')
 
 const router = express.Router()
 
@@ -44,5 +45,13 @@ router.post('/complete', authorize, tradeHandlers.complete)
 
 router.post('/transfer', authorize, transferHandlers.transfer)
 router.post('/purchase', authorize, transferHandlers.purchase)
+
+router.get('/exchange/rate', authorize, exchangeHandlers.getRate)
+router.get('/exchange/rates', authorize, exchangeHandlers.getRates)
+router.get(
+  '/exchange/historical',
+  authorize,
+  exchangeHandlers.getHistoricalRates
+)
 
 module.exports = router

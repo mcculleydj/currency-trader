@@ -4,24 +4,26 @@ option go_package = "github.com/mcculleydj/currency-trader/exchange/pkg/proto";
 
 package exchange;
 
-message Currency {
-  string currency = 1;
-}
-
-message CurrencyPair {
+message RateRequest {
   // base currency
   string base = 1;
   // quote currency
   string quote = 2;
 }
 
+message RatesRequest {
+  string currency = 1;
+}
+
 message ExchangeRate {
   // timestamp this rate was fetched
   int64 timestamp = 1;
-  // base and quote pair described
-  CurrencyPair pair = 2;
-  // quote currency necessary to purchase one unit of base currency
-  double rate = 3;
+  // base currency
+  string base = 2;
+  // quote currency
+  string quote = 3;
+  // amount of quote currency required to purchase 1 unit of base currency
+  double rate = 4;
 }
 
 message ExchangeRates {
@@ -33,9 +35,9 @@ message ExchangeRates {
 
 service Exchange {
   // current exchange rate given any two supported currencies
-  rpc GetRate(CurrencyPair) returns (ExchangeRate);
+  rpc GetRate(RateRequest) returns (ExchangeRate);
   // list of current exchange rates for base currency
-  rpc GetRates(Currency) returns (ExchangeRates);
+  rpc GetRates(RatesRequest) returns (ExchangeRates);
   // will use stream for practice
-  rpc GetHistoricalRates(Currency) returns (stream ExchangeRates);
+  rpc GetHistoricalRates(RatesRequest) returns (stream ExchangeRates);
 }

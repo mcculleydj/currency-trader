@@ -70,6 +70,35 @@ func getRates(date, source string) (*common.ResponseBody, error) {
 	return data, err
 }
 
+// get the latest date stored
+// and make API requests to populate
+// all days up to yesterday
+func catchUp(source string) error {
+	latest, err := store.GetLatest("USD")
+	if err != nil {
+		return err
+	}
+	dayBeforeYesterday := time.Now().Add(-48 * time.Hour)
+	// TODO: could be a DST bug in this
+	// easy enough to avoid by running catchUp at noon
+	for latest.Before(dayBeforeYesterday) {
+		latest = latest.Add(24 * time.Hour)
+		date := latest.Format("2006-01-02")
+		// replace with getRates to make actual API calls
+		// paid plan allows you to make a single request
+		// to get all rates in a certain date range
+		res, err := mockGetRates(date, source)
+		if err != nil {
+			return err
+		}
+		err = store.InsertRow(source, res)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func main() {
 	var reset *bool = flag.Bool("reset", false, "drop and recreate tables")
 	flag.Parse()
@@ -95,22 +124,24 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		// YYYY-MM-DD date string for 30 days ago
+		date := time.Now().Add(-1 * 24 * 30 * time.Hour).Format("2006-01-02")
+
+		// seed DB with an initial row to test catchUp
+		res, err := mockGetRates(date, "USD")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = store.InsertRow("USD", res)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
-	// TODO:
-	// - populate last 30 days of USD data
-	// - write a catch up function that will look at the latest day and populate until yesterday
-	// - catch up function could be run as a cron task to keep the archive up to date
-
-	// YYYY-MM-DD date string for yesterday
-	// yesterday := time.Now().Add(-24 * time.Hour).Format("2006-01-02")
-	// res, err := mockGetRates(yesterday, "USD")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// err = store.InsertRow("USD", res)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	err = catchUp("USD")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
