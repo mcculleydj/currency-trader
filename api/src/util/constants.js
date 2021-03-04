@@ -6,7 +6,7 @@ const currencies = [
   'aud',
   'cad',
   'chf',
-  'cnh',
+  'cny',
   'hkd',
   'nzd',
 ]

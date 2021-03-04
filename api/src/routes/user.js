@@ -1,5 +1,5 @@
 const { User } = require('../models')
-const { userSchema } = require('./validation')
+const { userSchema } = require('../validation')
 
 // user existence verified in authorization middleware
 

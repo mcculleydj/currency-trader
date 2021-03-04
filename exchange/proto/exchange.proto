@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+option go_package = "github.com/mcculleydj/currency-trader/exchange/pkg/proto";
+
+package exchange;
+
+message Currency {
+  string currency = 1;
+}
+
+message CurrencyPair {
+  // base currency
+  string base = 1;
+  // quote currency
+  string quote = 2;
+}
+
+message ExchangeRate {
+  // timestamp this rate was fetched
+  int32 timestamp = 1;
+  // base and quote pair described
+  CurrencyPair pair = 2;
+  // quote currency necessary to purchase one unit of base currency
+  double rate = 3;
+}
+
+message ExchangeRates {
+  // effective date
+  string date = 1;
+  // list of rates
+  repeated ExchangeRate rates = 3;
+}
+
+service Exchange {
+  // current exchange rate given any two supported currencies
+  rpc Rate(CurrencyPair) returns (ExchangeRate);
+  // list of current exchange rates for base currency
+  rpc Rates(Currency) returns (ExchangeRates);
+  // will use stream for practice
+  rpc HistoricalRates(Currency) returns (stream ExchangeRates);
+}

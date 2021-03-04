@@ -1,5 +1,5 @@
 const { Card } = require('../models')
-const { cardSchema } = require('./validation')
+const { cardSchema } = require('../validation')
 
 async function get(req, res) {
   try {

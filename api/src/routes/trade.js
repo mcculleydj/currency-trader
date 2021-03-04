@@ -1,7 +1,7 @@
 const { Op } = require('Sequelize')
 
 const { CompletedTrade, OpenTrade, User } = require('../models')
-const { tradeSchema, extendSchema } = require('./validation')
+const { tradeSchema, extendSchema } = require('../validation')
 const { addHours } = require('../util/functions')
 const sequelize = require('../db/postgres')
 

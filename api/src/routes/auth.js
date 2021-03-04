@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
 const { User } = require('../models')
-const { registerSchema, loginSchema } = require('./validation')
+const { registerSchema, loginSchema } = require('../validation')
 
 async function register(req, res) {
   const { error } = registerSchema.validate(req.body)

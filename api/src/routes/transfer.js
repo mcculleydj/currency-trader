@@ -1,5 +1,5 @@
 const sequelize = require('../db/postgres')
-const { transferSchema, purchaseSchema } = require('./validation')
+const { transferSchema, purchaseSchema } = require('../validation')
 
 async function transfer(req, res) {
   const { error } = transferSchema.validate(req.body)
