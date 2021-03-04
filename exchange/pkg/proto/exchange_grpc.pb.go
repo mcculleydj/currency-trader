@@ -19,11 +19,11 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ExchangeClient interface {
 	// current exchange rate given any two supported currencies
-	Rate(ctx context.Context, in *CurrencyPair, opts ...grpc.CallOption) (*ExchangeRate, error)
+	GetRate(ctx context.Context, in *CurrencyPair, opts ...grpc.CallOption) (*ExchangeRate, error)
 	// list of current exchange rates for base currency
-	Rates(ctx context.Context, in *Currency, opts ...grpc.CallOption) (*ExchangeRates, error)
+	GetRates(ctx context.Context, in *Currency, opts ...grpc.CallOption) (*ExchangeRates, error)
 	// will use stream for practice
-	HistoricalRates(ctx context.Context, in *Currency, opts ...grpc.CallOption) (Exchange_HistoricalRatesClient, error)
+	GetHistoricalRates(ctx context.Context, in *Currency, opts ...grpc.CallOption) (Exchange_GetHistoricalRatesClient, error)
 }
 
 type exchangeClient struct {
@@ -34,30 +34,30 @@ func NewExchangeClient(cc grpc.ClientConnInterface) ExchangeClient {
 	return &exchangeClient{cc}
 }
 
-func (c *exchangeClient) Rate(ctx context.Context, in *CurrencyPair, opts ...grpc.CallOption) (*ExchangeRate, error) {
+func (c *exchangeClient) GetRate(ctx context.Context, in *CurrencyPair, opts ...grpc.CallOption) (*ExchangeRate, error) {
 	out := new(ExchangeRate)
-	err := c.cc.Invoke(ctx, "/exchange.Exchange/Rate", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/exchange.Exchange/GetRate", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *exchangeClient) Rates(ctx context.Context, in *Currency, opts ...grpc.CallOption) (*ExchangeRates, error) {
+func (c *exchangeClient) GetRates(ctx context.Context, in *Currency, opts ...grpc.CallOption) (*ExchangeRates, error) {
 	out := new(ExchangeRates)
-	err := c.cc.Invoke(ctx, "/exchange.Exchange/Rates", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/exchange.Exchange/GetRates", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *exchangeClient) HistoricalRates(ctx context.Context, in *Currency, opts ...grpc.CallOption) (Exchange_HistoricalRatesClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Exchange_ServiceDesc.Streams[0], "/exchange.Exchange/HistoricalRates", opts...)
+func (c *exchangeClient) GetHistoricalRates(ctx context.Context, in *Currency, opts ...grpc.CallOption) (Exchange_GetHistoricalRatesClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Exchange_ServiceDesc.Streams[0], "/exchange.Exchange/GetHistoricalRates", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &exchangeHistoricalRatesClient{stream}
+	x := &exchangeGetHistoricalRatesClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -67,16 +67,16 @@ func (c *exchangeClient) HistoricalRates(ctx context.Context, in *Currency, opts
 	return x, nil
 }
 
-type Exchange_HistoricalRatesClient interface {
+type Exchange_GetHistoricalRatesClient interface {
 	Recv() (*ExchangeRates, error)
 	grpc.ClientStream
 }
 
-type exchangeHistoricalRatesClient struct {
+type exchangeGetHistoricalRatesClient struct {
 	grpc.ClientStream
 }
 
-func (x *exchangeHistoricalRatesClient) Recv() (*ExchangeRates, error) {
+func (x *exchangeGetHistoricalRatesClient) Recv() (*ExchangeRates, error) {
 	m := new(ExchangeRates)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -89,11 +89,11 @@ func (x *exchangeHistoricalRatesClient) Recv() (*ExchangeRates, error) {
 // for forward compatibility
 type ExchangeServer interface {
 	// current exchange rate given any two supported currencies
-	Rate(context.Context, *CurrencyPair) (*ExchangeRate, error)
+	GetRate(context.Context, *CurrencyPair) (*ExchangeRate, error)
 	// list of current exchange rates for base currency
-	Rates(context.Context, *Currency) (*ExchangeRates, error)
+	GetRates(context.Context, *Currency) (*ExchangeRates, error)
 	// will use stream for practice
-	HistoricalRates(*Currency, Exchange_HistoricalRatesServer) error
+	GetHistoricalRates(*Currency, Exchange_GetHistoricalRatesServer) error
 	mustEmbedUnimplementedExchangeServer()
 }
 
@@ -101,14 +101,14 @@ type ExchangeServer interface {
 type UnimplementedExchangeServer struct {
 }
 
-func (UnimplementedExchangeServer) Rate(context.Context, *CurrencyPair) (*ExchangeRate, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Rate not implemented")
+func (UnimplementedExchangeServer) GetRate(context.Context, *CurrencyPair) (*ExchangeRate, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRate not implemented")
 }
-func (UnimplementedExchangeServer) Rates(context.Context, *Currency) (*ExchangeRates, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Rates not implemented")
+func (UnimplementedExchangeServer) GetRates(context.Context, *Currency) (*ExchangeRates, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRates not implemented")
 }
-func (UnimplementedExchangeServer) HistoricalRates(*Currency, Exchange_HistoricalRatesServer) error {
-	return status.Errorf(codes.Unimplemented, "method HistoricalRates not implemented")
+func (UnimplementedExchangeServer) GetHistoricalRates(*Currency, Exchange_GetHistoricalRatesServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetHistoricalRates not implemented")
 }
 func (UnimplementedExchangeServer) mustEmbedUnimplementedExchangeServer() {}
 
@@ -123,60 +123,60 @@ func RegisterExchangeServer(s grpc.ServiceRegistrar, srv ExchangeServer) {
 	s.RegisterService(&Exchange_ServiceDesc, srv)
 }
 
-func _Exchange_Rate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Exchange_GetRate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CurrencyPair)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ExchangeServer).Rate(ctx, in)
+		return srv.(ExchangeServer).GetRate(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/exchange.Exchange/Rate",
+		FullMethod: "/exchange.Exchange/GetRate",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ExchangeServer).Rate(ctx, req.(*CurrencyPair))
+		return srv.(ExchangeServer).GetRate(ctx, req.(*CurrencyPair))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Exchange_Rates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Exchange_GetRates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Currency)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ExchangeServer).Rates(ctx, in)
+		return srv.(ExchangeServer).GetRates(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/exchange.Exchange/Rates",
+		FullMethod: "/exchange.Exchange/GetRates",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ExchangeServer).Rates(ctx, req.(*Currency))
+		return srv.(ExchangeServer).GetRates(ctx, req.(*Currency))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Exchange_HistoricalRates_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _Exchange_GetHistoricalRates_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(Currency)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(ExchangeServer).HistoricalRates(m, &exchangeHistoricalRatesServer{stream})
+	return srv.(ExchangeServer).GetHistoricalRates(m, &exchangeGetHistoricalRatesServer{stream})
 }
 
-type Exchange_HistoricalRatesServer interface {
+type Exchange_GetHistoricalRatesServer interface {
 	Send(*ExchangeRates) error
 	grpc.ServerStream
 }
 
-type exchangeHistoricalRatesServer struct {
+type exchangeGetHistoricalRatesServer struct {
 	grpc.ServerStream
 }
 
-func (x *exchangeHistoricalRatesServer) Send(m *ExchangeRates) error {
+func (x *exchangeGetHistoricalRatesServer) Send(m *ExchangeRates) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -188,18 +188,18 @@ var Exchange_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ExchangeServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Rate",
-			Handler:    _Exchange_Rate_Handler,
+			MethodName: "GetRate",
+			Handler:    _Exchange_GetRate_Handler,
 		},
 		{
-			MethodName: "Rates",
-			Handler:    _Exchange_Rates_Handler,
+			MethodName: "GetRates",
+			Handler:    _Exchange_GetRates_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "HistoricalRates",
-			Handler:       _Exchange_HistoricalRates_Handler,
+			StreamName:    "GetHistoricalRates",
+			Handler:       _Exchange_GetHistoricalRates_Handler,
 			ServerStreams: true,
 		},
 	},

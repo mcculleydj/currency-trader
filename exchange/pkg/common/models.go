@@ -8,3 +8,11 @@ type ResponseBody struct {
 	Timestamp int64              `json:"timestamp"`
 	Quotes    map[string]float64 `json:"quotes"`
 }
+
+func (r *ResponseBody) CastQuotes() map[string]interface{} {
+	m := map[string]interface{}{}
+	for currency, value := range r.Quotes {
+		m[currency] = value
+	}
+	return m
+}

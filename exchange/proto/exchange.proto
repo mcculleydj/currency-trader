@@ -17,7 +17,7 @@ message CurrencyPair {
 
 message ExchangeRate {
   // timestamp this rate was fetched
-  int32 timestamp = 1;
+  int64 timestamp = 1;
   // base and quote pair described
   CurrencyPair pair = 2;
   // quote currency necessary to purchase one unit of base currency
@@ -25,17 +25,17 @@ message ExchangeRate {
 }
 
 message ExchangeRates {
-  // effective date
+  // effective date (useful for historical data)
   string date = 1;
   // list of rates
-  repeated ExchangeRate rates = 3;
+  repeated ExchangeRate rates = 2;
 }
 
 service Exchange {
   // current exchange rate given any two supported currencies
-  rpc Rate(CurrencyPair) returns (ExchangeRate);
+  rpc GetRate(CurrencyPair) returns (ExchangeRate);
   // list of current exchange rates for base currency
-  rpc Rates(Currency) returns (ExchangeRates);
+  rpc GetRates(Currency) returns (ExchangeRates);
   // will use stream for practice
-  rpc HistoricalRates(Currency) returns (stream ExchangeRates);
+  rpc GetHistoricalRates(Currency) returns (stream ExchangeRates);
 }

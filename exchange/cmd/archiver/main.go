@@ -1,11 +1,11 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"strings"
@@ -15,24 +15,26 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/mcculleydj/currency-trader/exchange/pkg/common"
 	"github.com/mcculleydj/currency-trader/exchange/pkg/store"
+	flag "github.com/spf13/pflag"
 )
 
 func mockGetRates(date, source string) (*common.ResponseBody, error) {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	res := &common.ResponseBody{
 		Source:    source,
 		Date:      date,
 		Timestamp: time.Now().Unix(),
 		Quotes: map[string]float64{
 			"USDUSD": 1,
-			"USDEUR": 1,
-			"USDJPY": 1,
-			"USDGBP": 1,
-			"USDAUD": 1,
-			"USDCAD": 1,
-			"USDCHF": 1,
-			"USDCNY": 1,
-			"USDHKD": 1,
-			"USDNZD": 1,
+			"USDEUR": r.Float64() * 10,
+			"USDJPY": r.Float64() * 10,
+			"USDGBP": r.Float64() * 10,
+			"USDAUD": r.Float64() * 10,
+			"USDCAD": r.Float64() * 10,
+			"USDCHF": r.Float64() * 10,
+			"USDCNY": r.Float64() * 10,
+			"USDHKD": r.Float64() * 10,
+			"USDNZD": r.Float64() * 10,
 		},
 	}
 	return res, nil
@@ -41,6 +43,7 @@ func mockGetRates(date, source string) (*common.ResponseBody, error) {
 // retrieves the rates for a given base currency on a given date
 // from Currency Trader API
 func getRates(date, source string) (*common.ResponseBody, error) {
+
 	// sources other than USD require a paid plan
 	// https requires a paid plan -- access key is sent in the clear
 	uri := fmt.Sprintf(
@@ -68,35 +71,30 @@ func getRates(date, source string) (*common.ResponseBody, error) {
 }
 
 func main() {
+	var reset *bool = flag.Bool("reset", false, "drop and recreate tables")
+	flag.Parse()
+
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	uri := fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/archive?sslmode=disable",
-		os.Getenv("POSTGRES_USER"),
-		os.Getenv("POSTGRES_PASSWORD"),
-		os.Getenv("POSTGRES_HOST"),
-		os.Getenv("POSTGRES_PORT"),
-	)
-	db, err := sql.Open("postgres", uri)
+	err = store.DBConnect()
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
+	defer store.DBClose()
 
-	// TODO:
-	// - wrap these in a reset cmd line flag
+	if *reset {
+		err = store.DropTables()
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	err = store.DropTables(db)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = store.CreateTables(db)
-	if err != nil {
-		log.Fatal(err)
+		err = store.CreateTables()
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	// TODO:
@@ -105,14 +103,14 @@ func main() {
 	// - catch up function could be run as a cron task to keep the archive up to date
 
 	// YYYY-MM-DD date string for yesterday
-	yesterday := time.Now().Add(-24 * time.Hour).Format("2006-01-02")
-	res, err := mockGetRates(yesterday, "USD")
-	if err != nil {
-		log.Fatal(err)
-	}
+	// yesterday := time.Now().Add(-24 * time.Hour).Format("2006-01-02")
+	// res, err := mockGetRates(yesterday, "USD")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	err = store.InsertRow(db, "USD", res)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// err = store.InsertRow("USD", res)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 }
