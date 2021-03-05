@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"io"
 	"log"
 	"net"
 	"strings"
@@ -65,6 +64,7 @@ func (s *exchangeServer) GetHistoricalRates(req *proto.RatesRequest, stream prot
 	if err != nil {
 		return err
 	}
+	// stream from Postgres to gRPC client
 	for rows.Next() {
 		ar := common.ArchiveRow{}
 		err := rows.StructScan(&ar)
@@ -92,7 +92,7 @@ func (s *exchangeServer) GetHistoricalRates(req *proto.RatesRequest, stream prot
 			Rates: xrs,
 		})
 	}
-	return io.EOF
+	return nil
 }
 
 func main() {

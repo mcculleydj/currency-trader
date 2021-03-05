@@ -50,18 +50,19 @@ function getRates(currency) {
 }
 
 function getHistoricalRates(currency) {
-  // might do something else with the stream
-  // other than just exhaust it into an array
+  // could do something other than coalesce
+  // the data into an array
   return new Promise((res, rej) => {
     const stream = stub.getHistoricalRates({ currency })
     const rates = []
-    // figure out how to trigger end using Go => Node
-    // EOF is an error
     stream.on('data', rate => rates.push(rate))
     stream.on('error', rej)
     stream.on('end', () => res(rates))
   })
 }
+
+// find a free way to query live rates
+// and can stream directly to client
 
 module.exports = {
   getRate,
