@@ -32,7 +32,7 @@ async function init() {
     })
     await user.createWallet({ aud: 100 })
   } catch (error) {
-    console.log('unable to sync', error)
+    console.error(error)
   }
 }
 
