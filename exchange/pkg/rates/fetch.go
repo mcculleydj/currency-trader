@@ -50,7 +50,7 @@ func mockFetch(source string) (*common.ResponseBody, error) {
 }
 
 // fetch makes an API call to the live endpoint
-// to fetch the latest data for the source currency
+// to fetch  latest data for source currency
 func fetch(source string) (*common.ResponseBody, error) {
 	// sources other than USD require a paid plan
 	// https requires a paid plan -- access key is sent in the clear
