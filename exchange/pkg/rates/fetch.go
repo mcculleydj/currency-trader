@@ -49,6 +49,7 @@ func mockFetch(source string) (*common.ResponseBody, error) {
 	return res, nil
 }
 
+// TODO: http.Client aligning timeout with sleep
 // fetch makes an API call to the live endpoint
 // to fetch  latest data for source currency
 func fetch(source string) (*common.ResponseBody, error) {
@@ -65,6 +66,7 @@ func fetch(source string) (*common.ResponseBody, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {

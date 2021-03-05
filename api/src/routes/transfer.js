@@ -1,6 +1,8 @@
 const sequelize = require('../db/postgres')
 const { transferSchema, purchaseSchema } = require('../util/validation')
 
+// TODO: should not be able to transfer or trade more than you have
+
 async function transfer(req, res) {
   const { error } = transferSchema.validate(req.body)
 

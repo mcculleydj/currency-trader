@@ -6,7 +6,7 @@ async function authorize(req, res, next) {
   const bearerToken = req.get('Authorization')
 
   if (!bearerToken || !bearerToken.startsWith('Bearer ')) {
-    return res.sendStatus(403)
+    return res.sendStatus(401)
   }
 
   const token = bearerToken.split('Bearer ')[1]
@@ -14,15 +14,16 @@ async function authorize(req, res, next) {
 
   try {
     id = jwt.verify(token, 'secret').id
+    if (!id) throw 'missing id'
   } catch (error) {
-    return res.sendStatus(403)
+    return res.sendStatus(401)
   }
 
   try {
     const user = await User.findByPk(id)
 
     if (!user) {
-      res.status(404).send('user not found')
+      res.status(404).send('User Not Found')
     }
 
     req.user = user
@@ -33,4 +34,4 @@ async function authorize(req, res, next) {
   }
 }
 
-module.exports = authorize
+module.exports = { authorize }

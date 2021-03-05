@@ -1,7 +1,7 @@
 const express = require('express')
 
 // middleware
-const authorize = require('../util/auth')
+const { authorize } = require('../util/auth')
 
 // handlers
 const authHandlers = require('./auth')

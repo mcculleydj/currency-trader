@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "test": "mocha --recursive --exit"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.2.8",
@@ -18,6 +19,11 @@
     "sequelize": "^6.5.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.7"
+    "chai": "^4.3.3",
+    "chai-http": "^4.3.0",
+    "mocha": "^8.3.0",
+    "nodemon": "^2.0.7",
+    "sinon": "^9.2.4",
+    "sinon-chai": "^3.5.0"
   }
 }

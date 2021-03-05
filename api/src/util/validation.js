@@ -4,7 +4,8 @@ const { currencies } = require('../util/constants')
 
 const id = Joi.number().integer().min(1)
 const name = Joi.string().alphanum().min(3).max(30)
-const password = Joi.string().pattern(new RegExp('^[a-zA-Z0-9]{8,30}$'))
+// TODO: use a password complexity lib
+const password = Joi.string().alphanum().min(8).max(30)
 const confirmPassword = Joi.ref('password')
 const email = Joi.string().email({ minDomainSegments: 2 })
 const defaultCurrency = Joi.string().valid(...currencies)

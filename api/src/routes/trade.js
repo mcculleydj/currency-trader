@@ -5,6 +5,8 @@ const { tradeSchema, extendSchema } = require('../util/validation')
 const { addHours } = require('../util/functions')
 const sequelize = require('../db/postgres')
 
+// TODO: should not be able to transfer or trade more than you have
+
 async function getAll(req, res) {
   try {
     const openTrades = await OpenTrade.findAll({

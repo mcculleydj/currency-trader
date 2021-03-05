@@ -1,5 +1,6 @@
 const { User } = require('../models')
 const { userSchema } = require('../util/validation')
+const { currencies } = require('../util/constants')
 
 // user existence verified in authorization middleware
 
@@ -26,14 +27,27 @@ async function update(req, res) {
 
 async function remove(req, res) {
   try {
+    // TODO: test findOne for a null result
+    // does it reject or resolve?
     const user = await User.findOne({
       where: { id: req.user.id },
       attributes: { exclude: ['password'] },
     })
-    // will this return both offeror and offeree?
+    // wallet must be empty before deactivating
+    const wallet = await user.getWallet()
+    if (currencies.some(c => wallet[c])) {
+      return res
+        .status(400)
+        .send('cannot deactivate account with currency in wallet')
+    }
+
+    // getOpenTrades only returns trades where this user is the offeror
+    // being offered a trade should not preclude a user from deactivating
+
+    // TODO: certain that this will be []?
     const openTrades = await user.getOpenTrades()
 
-    // do not allow users with open trades to remove their account
+    // do not allow users with open trades to deactivate
     if (openTrades.length > 0) {
       return res.status(400).send('cannot deactivate account with open trades')
     }
