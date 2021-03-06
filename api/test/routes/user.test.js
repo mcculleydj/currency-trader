@@ -102,6 +102,19 @@ describe('routes/user', function () {
         })
     })
 
+    it('should send a 400 when update body password does not match confirmPassword', function () {
+      chai
+        .request(app)
+        .patch('/user')
+        .send({
+          password: 'testPassword',
+          confirmPassword: 'testPassword2',
+        })
+        .end((_, res) => {
+          expect(res.status).to.equal(400)
+        })
+    })
+
     it('should send a 400 when update body email is not a valid email', function () {
       chai
         .request(app)
@@ -290,7 +303,7 @@ describe('routes/user', function () {
       expect(User.destroy).to.have.been.calledWith(
         sinon.match({ where: { id: 1 } })
       )
-      // user object is heavily modified for this test 
+      // user object is heavily modified for this test
       // simply check name to be sure this endpoint is sending back a user object
       // unlike in auth middleware stripping the password happens at the DB level
       expect(res.body.name).to.equal('test')
