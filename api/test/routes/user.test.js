@@ -290,8 +290,8 @@ describe('routes/user', function () {
       expect(User.destroy).to.have.been.calledWith(
         sinon.match({ where: { id: 1 } })
       )
-      // user object is modified for this test -- simply check name to be sure
-      // this endpoint is sending back a user object
+      // user object is heavily modified for this test 
+      // simply check name to be sure this endpoint is sending back a user object
       // unlike in auth middleware stripping the password happens at the DB level
       expect(res.body.name).to.equal('test')
       User.findOne.restore()
