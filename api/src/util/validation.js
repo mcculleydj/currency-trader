@@ -20,8 +20,8 @@ const registerSchema = Joi.object({
 }).with('password', 'confirmPassword')
 
 const loginSchema = Joi.object({
-  name: name.required(),
-  password: password.required(),
+  name: Joi.required(),
+  password: Joi.required(),
 })
 
 const userSchema = Joi.object({

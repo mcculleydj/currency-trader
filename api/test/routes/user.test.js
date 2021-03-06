@@ -190,6 +190,14 @@ describe('routes/user', function () {
       User.findOne.restore()
     })
 
+    it('should send a 404 if user not found', async function () {
+      sinon.stub(User, 'findOne').returns(Promise.resolve(null))
+      const res = await chai.request(app).delete('/user')
+      expect(res.status).to.equal(404)
+      expect(res.text).to.equal('User Not Found')
+      User.findOne.restore()
+    })
+
     it('should send a 500 if user getWallet rejects', async function () {
       const user = {
         ...defaultUser(),

@@ -3,6 +3,7 @@ const chai = require('chai')
 const chaiHttp = require('chai-http')
 const sinon = require('sinon')
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 const auth = require('../../src/util/auth')
 const { User } = require('../../src/models')
@@ -326,6 +327,80 @@ describe('routes/auth', function () {
         email: 'test@test.com',
         defaultCurrency: 'usd',
       })
+    })
+  })
+
+  describe('login', function () {
+    it('should send a 400 response when name or password is missing', function () {
+      chai
+        .request(app)
+        .post('/auth/login')
+        .send({
+          name: 'test',
+        })
+        .end((_, res) => {
+          expect(res.status).to.equal(400)
+        })
+      chai
+        .request(app)
+        .post('/auth/login')
+        .send({
+          password: 'test',
+        })
+        .end((_, res) => {
+          expect(res.status).to.equal(400)
+        })
+    })
+
+    it('should send a 500 response if user findOne rejects', async function () {
+      User.findOne.callsFake(() => Promise.reject())
+      const res = await chai.request(app).post('/auth/login').send({
+        name: 'test',
+        password: 'test',
+      })
+      expect(res.status).to.equal(500)
+    })
+
+    it('should send a 401 response if user DNE', async function () {
+      User.findOne.callsFake(() => Promise.resolve(null))
+      const res = await chai.request(app).post('/auth/login').send({
+        name: 'test',
+        password: 'test',
+      })
+      expect(res.status).to.equal(401)
+    })
+
+    it('should send a 401 response if password does not match', async function () {
+      User.findOne.callsFake(() =>
+        Promise.resolve({
+          name: 'test',
+          password: 'notTestHashed',
+        })
+      )
+      const res = await chai.request(app).post('/auth/login').send({
+        name: 'test',
+        password: 'test',
+      })
+      expect(res.status).to.equal(401)
+    })
+
+    it('should send a valid JWT with the user ID in the payload', async function () {
+      User.findOne.callsFake(() =>
+        Promise.resolve({
+          id: 1,
+          name: 'test',
+          password: 'password',
+        })
+      )
+      sinon.stub(bcrypt, 'compareSync').returns(true)
+      const res = await chai.request(app).post('/auth/login').send({
+        name: 'test',
+        password: 'password',
+      })
+      expect(res.status).to.equal(200)
+      const { id } = jwt.verify(res.body.token, 'secret')
+      expect(id).to.equal(1)
+      bcrypt.compareSync.restore()
     })
   })
 })

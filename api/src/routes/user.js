@@ -27,12 +27,15 @@ async function update(req, res) {
 
 async function remove(req, res) {
   try {
-    // TODO: test findOne for a null result
-    // does it reject or resolve?
     const user = await User.findOne({
       where: { id: req.user.id },
       attributes: { exclude: ['password'] },
     })
+
+    if (!user) {
+      return res.status(404).send('User Not Found')
+    }
+
     // wallet must be empty before deactivating
     const wallet = await user.getWallet()
     if (currencies.some(c => wallet[c])) {

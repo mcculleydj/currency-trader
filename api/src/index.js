@@ -15,22 +15,22 @@ const port = process.env.PORT || 3000
 // async function init() {
 //   try {
 //     await sync(true)
-//     let user = await User.create({
-//       name: 'user1',
-//       password: 'password1',
-//       confirmPassword: 'password1',
-//       email: 'user1@gmail.com',
-//       defaultCurrency: 'usd',
-//     })
-//     await user.createWallet({ usd: 100 })
-//     user = await User.create({
-//       name: 'user2',
-//       password: 'password2',
-//       confirmPassword: 'password2',
-//       email: 'user2@gmail.com',
-//       defaultCurrency: 'usd',
-//     })
-//     await user.createWallet({ aud: 100 })
+// let user = await User.create({
+//   name: 'user1',
+//   password: 'password1',
+//   confirmPassword: 'password1',
+//   email: 'user1@gmail.com',
+//   defaultCurrency: 'usd',
+// })
+// await user.createWallet({ usd: 100 })
+// user = await User.create({
+//   name: 'user2',
+//   password: 'password2',
+//   confirmPassword: 'password2',
+//   email: 'user2@gmail.com',
+//   defaultCurrency: 'usd',
+// })
+// await user.createWallet({ aud: 100 })
 //   } catch (error) {
 //     console.error(error)
 //   }

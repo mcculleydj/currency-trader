@@ -42,12 +42,14 @@ async function login(req, res) {
   }
 
   try {
+    // null if no row matches where clause
     const user = await User.findOne({ where: { name: req.body.name } })
 
     if (!user || !bcrypt.compareSync(req.body.password, user.password)) {
       return res.status(401).send('unable to authenticate user')
     }
 
+    // TODO: would get JWT secret from a non-version-controlled file
     const token = jwt.sign({ id: user.id }, 'secret')
 
     res.send({ token })
