@@ -1,3 +1,4 @@
+require('dotenv').config()
 const { expect } = require('chai')
 const chai = require('chai')
 const chaiHttp = require('chai-http')
@@ -398,7 +399,7 @@ describe('routes/auth', function () {
         password: 'password',
       })
       expect(res.status).to.equal(200)
-      const { id } = jwt.verify(res.body.token, 'secret')
+      const { id } = jwt.verify(res.body.token, process.env.JWT_SECRET)
       expect(id).to.equal(1)
       bcrypt.compareSync.restore()
     })

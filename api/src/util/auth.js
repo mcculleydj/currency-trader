@@ -13,7 +13,7 @@ async function authorize(req, res, next) {
   let id
 
   try {
-    id = jwt.verify(token, 'secret').id
+    id = jwt.verify(token, process.env.JWT_SECRET).id
     if (!id) throw 'missing id'
   } catch (error) {
     return res.sendStatus(401)

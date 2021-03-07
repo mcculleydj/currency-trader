@@ -45,11 +45,13 @@ async function remove(req, res) {
     }
 
     // getOpenTrades only returns trades where this user is the offeror
-    // being offered a trade should not preclude a user from deactivating
+    // this is beneficial since being offered a trade
+    // should not preclude a user from deactivating
 
-    // TODO: certain that this will be []?
+    // TODO: however, it would be nice to send a message to offerors, letting them know that someone they offered a trade to was no longer active
+
+    // will be [] -- to indicate no open trades
     const openTrades = await user.getOpenTrades()
-
     // do not allow users with open trades to deactivate
     if (openTrades.length > 0) {
       return res.status(400).send('cannot deactivate account with open trades')

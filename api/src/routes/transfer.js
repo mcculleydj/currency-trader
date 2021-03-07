@@ -1,4 +1,5 @@
 const sequelize = require('../db/postgres')
+const { Transfer } = require('../models')
 const { transferSchema, purchaseSchema } = require('../util/validation')
 
 // TODO: should not be able to transfer or trade more than you have
@@ -22,7 +23,7 @@ async function transfer(req, res) {
     }
 
     const banks = await wallet.getBanks({
-      where: { id: req.body.destinationId },
+      where: { id: req.body.destination },
     })
 
     if (banks.length === 0) {

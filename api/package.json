@@ -5,12 +5,13 @@
   "license": "MIT",
   "scripts": {
     "dev": "nodemon src/index.js",
-    "test": "mocha --recursive --exit"
+    "test": "PORT=3001 mocha --recursive --exit"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.2.8",
     "@grpc/proto-loader": "^0.5.6",
     "bcrypt": "^5.0.1",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "joi": "^17.4.0",
     "jsonwebtoken": "^8.5.1",

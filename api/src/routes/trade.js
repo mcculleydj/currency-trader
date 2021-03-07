@@ -63,6 +63,7 @@ async function create(req, res) {
 
     const offeree = await User.findByPk(req.body.offeree)
 
+    // offeree DNE or attempting a trade with self
     if (!offeree || req.body.offeree === req.user.id) {
       return res.status(400).send('cannot trade with this user')
     }
@@ -177,8 +178,14 @@ async function complete(req, res) {
     }
 
     const offeror = await User.findByPk(trade.offeror)
-    const offerorWallet = await offeror.getWallet()
-    const offereeWallet = await req.user.getWallet()
+    const offerorWallet = await offeror.getWallet({
+      transaction,
+      lock: transaction.LOCK.UPDATE,
+    })
+    const offereeWallet = await req.user.getWallet({
+      transaction,
+      lock: transaction.LOCK.UPDATE,
+    })
 
     const transactionError = await transact(
       transaction,

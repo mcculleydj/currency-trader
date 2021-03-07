@@ -16,9 +16,17 @@ import (
 	"github.com/mcculleydj/currency-trader/exchange/pkg/store"
 )
 
+var client *http.Client
+var timeout time.Duration
 var lock chan struct{}
 
 func init() {
+	// align Redis check sleep timer with HTTP timeout
+	timeout = 500 * time.Millisecond
+	// default indefinite timeout requires defining our own client
+	client = &http.Client{
+		Timeout: timeout,
+	}
 	// normally would have a lock per currency
 	// single channel, since USD is the only supported source
 	// lock prevents multiple clients from triggering simultaneous
@@ -49,7 +57,6 @@ func mockFetch(source string) (*common.ResponseBody, error) {
 	return res, nil
 }
 
-// TODO: http.Client aligning timeout with sleep
 // fetch makes an API call to the live endpoint
 // to fetch  latest data for source currency
 func fetch(source string) (*common.ResponseBody, error) {
@@ -62,12 +69,19 @@ func fetch(source string) (*common.ResponseBody, error) {
 		os.Getenv("CURRENCY_LAYER_ACCESS_KEY"),
 	)
 
-	res, err := http.Get(uri)
+	req, err := http.NewRequest("GET", uri, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer res.Body.Close()
 
+	// is ReadAll poor practice? what to replace it with?
+	// https://github.com/golang/go/issues/14942
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
@@ -148,7 +162,7 @@ func GetRates(source string, attempt int) (int64, map[string]float64, error) {
 			ts = res.Timestamp
 			quotes = res.Quotes
 		default:
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(timeout)
 			return GetRates(source, attempt+1)
 		}
 	} else if err != nil {

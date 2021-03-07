@@ -82,8 +82,7 @@ const purchaseSchema = Joi.object({
 })
 
 const transferSchema = Joi.object({
-  destinationId: id,
-  destination: Joi.string().required(),
+  destination: id.required(),
   amount: amount.required(),
 })
 
